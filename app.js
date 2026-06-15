@@ -407,6 +407,14 @@ function taxiIcon(heading) {
     });
 }
 
+function setMapBearing(deg) {
+    if (!mapContainer) return;
+    const tilePane = mapContainer.querySelector('.leaflet-tile-pane');
+    if (tilePane) {
+        tilePane.style.transform = 'rotate(' + (-deg) + 'deg) scale(1.25)';
+    }
+}
+
 function dotIcon() {
     return L.divIcon({
         className: 'custom-marker',
@@ -453,6 +461,7 @@ function updatePos(lat, lng, heading) {
     if (map) {
         if (isNavigating) {
             map.panTo([lat, lng], { animate: true, duration: 0.3 });
+            setMapBearing(lastHeading || 0);
         } else if (!trip.active) {
             map.panTo([lat, lng], { animate: true, duration: 0.5 });
         }
@@ -1188,7 +1197,10 @@ function startNavigation() {
             // Inicializa barra de progresso e info restante
             $('navProgressFill').style.width = '0%';
             $('navRemainingInfo').textContent = (navTotalDist / 1000).toFixed(1) + ' km restantes · ' + Math.round(navTotalDur) + ' min';
+            // Rotaciona mapa pro heading atual
+            setMapBearing(lastHeading || 0);
             // Zoom no veículo (modo navegação tipo Waze)
+            mapContainer.classList.add('navigating');
             map.setView([currentPos[0], currentPos[1]], 19, { animate: true, duration: 0.5 });
         })
         .catch(() => {});
@@ -1281,6 +1293,10 @@ function clearRoute() {
     navCurrentStep = -1;
     navTotalDist = 0;
     navTotalDur = 0;
+    // Restaura orientação do mapa
+    const tilePane = mapContainer ? mapContainer.querySelector('.leaflet-tile-pane') : null;
+    if (tilePane) tilePane.style.transform = '';
+    if (mapContainer) mapContainer.classList.remove('navigating');
     $('navPanel').classList.add('hidden');
 }
 

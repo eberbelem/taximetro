@@ -1032,8 +1032,7 @@ function onDestInput() {
                         e.preventDefault();
                         destInput.value = name;
                         autocompleteList.classList.add('hidden');
-                        currentPos = currentPos || [place.lat, place.lon];
-                        openNavigationWithCoords(parseFloat(place.lat), parseFloat(place.lon), name);
+                        calcRouteAndShowModal(parseFloat(place.lat), parseFloat(place.lon), name);
                     });
                     autocompleteList.appendChild(item);
                 });
@@ -1043,10 +1042,12 @@ function onDestInput() {
     }, 300);
 }
 
-function openNavigationWithCoords(destLat, destLng, destName) {
+let _navLat, _navLng, _navName;
+
+function calcRouteAndShowModal(destLat, destLng, destName) {
     if (!currentPos || !map) return;
     clearRoute();
-    destInput.placeholder = 'Buscando rota...';
+    destInput.placeholder = 'Calculando rota...';
 
     fetch('https://router.project-osrm.org/route/v1/driving/' +
         currentPos[1] + ',' + currentPos[0] + ';' + destLng + ',' + destLat +
@@ -1059,6 +1060,43 @@ function openNavigationWithCoords(destLat, destLng, destName) {
                 return;
             }
             const route = routeData.routes[0];
+            const distKm = (route.distance / 1000).toFixed(1);
+            const durMin = Math.round(route.duration / 60);
+
+            _navLat = destLat;
+            _navLng = destLng;
+            _navName = destName;
+
+            const estFare = config.bandeirada + (parseFloat(distKm) * config.tarifa1);
+            $('navDestName').textContent = destName;
+            $('navDist').textContent = distKm + ' km';
+            $('navTempo').textContent = durMin + ' min';
+            $('navEstFare').textContent = 'Valor estimado da corrida: ' + fmtMoney(estFare);
+
+            $('navModal').classList.remove('hidden');
+            destInput.placeholder = distKm + ' km · ' + durMin + ' min — ' + destName;
+        })
+        .catch(() => {
+            destInput.placeholder = 'Erro ao calcular rota';
+            setTimeout(() => { destInput.placeholder = 'Digite o endereço...'; }, 2000);
+        });
+}
+
+function drawRouteOnMap() {
+    if (!currentPos || !map || !_navLat || !_navLng) return;
+    clearRoute();
+    destInput.placeholder = 'Desenhando trajeto...';
+
+    fetch('https://router.project-osrm.org/route/v1/driving/' +
+        currentPos[1] + ',' + currentPos[0] + ';' + _navLng + ',' + _navLat +
+        '?overview=full&geometries=geojson&steps=false&alternatives=false')
+        .then(r => r.json())
+        .then(routeData => {
+            if (!routeData || !routeData.routes || !routeData.routes.length) {
+                destInput.placeholder = 'Rota não encontrada';
+                return;
+            }
+            const route = routeData.routes[0];
             const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
 
             routeLine = L.polyline(coords, {
@@ -1068,7 +1106,7 @@ function openNavigationWithCoords(destLat, destLng, destName) {
             const startMarker = L.circleMarker([currentPos[0], currentPos[1]], {
                 radius: 8, color: '#00c853', fillColor: '#00c853', fillOpacity: 1
             }).addTo(map);
-            const endMarker = L.circleMarker([destLat, destLng], {
+            const endMarker = L.circleMarker([_navLat, _navLng], {
                 radius: 8, color: '#ff5252', fillColor: '#ff5252', fillOpacity: 1
             }).addTo(map);
             routeLayer = L.layerGroup([startMarker, endMarker]);
@@ -1077,11 +1115,11 @@ function openNavigationWithCoords(destLat, destLng, destName) {
 
             const distKm = (route.distance / 1000).toFixed(1);
             const durMin = Math.round(route.duration / 60);
-            destInput.placeholder = distKm + ' km · ' + durMin + ' min — ' + destName;
+            destInput.placeholder = distKm + ' km · ' + durMin + ' min — ' + _navName;
+            el('navModal').classList.add('hidden');
         })
         .catch(() => {
-            destInput.placeholder = 'Erro ao calcular rota';
-            setTimeout(() => { destInput.placeholder = 'Digite o endereço...'; }, 2000);
+            destInput.placeholder = 'Erro ao desenhar trajeto';
         });
 }
 
@@ -1117,7 +1155,7 @@ function openNavigation() {
                 setTimeout(() => { destInput.placeholder = 'Digite o endereço...'; }, 2000);
                 return;
             }
-            openNavigationWithCoords(parseFloat(data[0].lat), parseFloat(data[0].lon), data[0].display_name);
+            calcRouteAndShowModal(parseFloat(data[0].lat), parseFloat(data[0].lon), data[0].display_name);
         })
         .catch(() => {
             destInput.placeholder = 'Erro ao buscar endereço';
@@ -1352,6 +1390,21 @@ function registrarEventos() {
     destInput.addEventListener('blur', () => setTimeout(() => { autocompleteList.classList.add('hidden'); }, 200));
     destInput.addEventListener('focus', () => { if (autocompleteList.children.length) autocompleteList.classList.remove('hidden'); });
     destInput.parentNode.appendChild(autocompleteList);
+
+    const navModal = document.getElementById('navModal');
+    const btnDrawRoute = document.getElementById('btnDrawRoute');
+    const btnStartNav = document.getElementById('btnStartNav');
+    if (navModal) navModal.addEventListener('click', e => { if (e.target === navModal) navModal.classList.add('hidden'); });
+    if (btnDrawRoute) btnDrawRoute.addEventListener('click', drawRouteOnMap);
+    if (btnStartNav) btnStartNav.addEventListener('click', () => {
+        if (!_navLat || !_navLng || !currentPos) return;
+        const url = 'https://www.google.com/maps/dir/?api=1&origin=' +
+            currentPos[0] + ',' + currentPos[1] +
+            '&destination=' + _navLat + ',' + _navLng +
+            '&travelmode=driving';
+        window.open(url, '_blank');
+        navModal.classList.add('hidden');
+    });
 
     btnLogin.addEventListener('click', handleLogin);
     pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });

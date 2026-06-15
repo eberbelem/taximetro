@@ -150,6 +150,34 @@
             </div>
         </div>
 
+        <!-- ===== MODAL OPÇÕES DE NAVEGAÇÃO ===== -->
+        <div id="navModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-icon">&#128205;</span>
+                    <h2>OPÇÕES DE NAVEGAÇÃO</h2>
+                </div>
+                <div class="modal-body" id="navModalBody">
+                    <div id="navDestName" class="nav-dest-name">—</div>
+                    <div class="nav-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Distância</span>
+                            <span id="navDist" class="stat-value">0,0 km</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Tempo</span>
+                            <span id="navTempo" class="stat-value">00 min</span>
+                        </div>
+                    </div>
+                    <div class="nav-est-fare" id="navEstFare"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnDrawRoute" class="ctrl-btn">&#128506; DESENHAR TRAJETO</button>
+                    <button id="btnStartNav" class="ctrl-btn print-btn">&#128241; INICIAR NAVEGAÇÃO</button>
+                </div>
+            </div>
+        </div>
+
         <!-- ===== RECIBO OCULTO (para impressão térmica 50mm) ===== -->
         <div id="receiptContent" class="hidden">
             <div id="receiptInner">

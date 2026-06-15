@@ -45,7 +45,7 @@ body {
 /* ========== MAPA ========== */
 #map {
     position: absolute;
-    top: 182px;
+    top: 178px;
     left: 10px;
     right: 10px;
     bottom: 82px;
@@ -206,19 +206,18 @@ body {
 }
 
 #fareBox {
-    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     background: linear-gradient(135deg, #1565c0, #1976d2);
     border-radius: 14px;
-    padding: 8px 0;
+    padding: 8px 10px;
     box-shadow: 0 4px 20px rgba(21,101,192,0.4);
-    min-height: 80px;
+    min-height: 76px;
 }
 
 .menu-btn {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
+    flex: 0 0 auto;
     background: rgba(0,0,0,0.2);
     border: none;
     color: #fff;
@@ -238,7 +237,7 @@ body {
 }
 
 .menu-btn:active {
-    transform: translateY(-50%) scale(0.88);
+    transform: scale(0.88);
 }
 
 .fab-print {
@@ -277,13 +276,14 @@ body {
 }
 
 #fareCenter {
-    width: 100%;
+    flex: 1;
     text-align: center;
-    padding: 0 80px;
+    min-width: 0;
+    overflow: hidden;
 }
 
 #fareValue {
-    font-size: clamp(28px, 10vw, 56px);
+    font-size: clamp(20px, 7vw, 48px);
     font-weight: 800;
     color: #fff;
     line-height: 1.1;
@@ -292,6 +292,8 @@ body {
     margin-bottom: 2px;
     text-shadow: 0 1px 3px rgba(0,0,0,0.2);
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #fareValue.b2-active {
@@ -300,8 +302,8 @@ body {
 
 #tripInfo {
     display: flex;
-    gap: 8px;
-    font-size: 11px;
+    gap: 6px;
+    font-size: 10px;
     color: rgba(255,255,255,0.7);
     font-weight: 600;
     justify-content: center;
@@ -322,27 +324,24 @@ body {
 #waitLabel { font-size: 10px; color: #ffcc02; font-weight: 600; }
 
 #bandeiraBox {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
+    flex: 0 0 auto;
     background: linear-gradient(180deg, #ffd700, #e6b800);
     border-radius: 12px;
-    padding: 10px 12px;
+    padding: 8px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 16px rgba(255,215,0,0.35);
-    min-width: 70px;
+    min-width: 64px;
 }
 
 #bandeiraNum {
-    font-size: clamp(24px, 8vw, 36px);
+    font-size: clamp(20px, 6vw, 32px);
     font-weight: 900;
     color: #4a3500;
     line-height: 1.0;
-    margin: 2px 0;
+    margin: 1px 0;
 }
 
 #bandeiraLabel {
@@ -366,32 +365,39 @@ body {
 
 /* ========== RESPONSIVO TELAS PEQUENAS ========== */
 @media (max-width: 400px) {
-    #fareCenter {
-        padding: 0 60px;
+    #fareBox {
+        gap: 4px;
+        padding: 6px 6px;
+        min-height: 68px;
     }
     #fareValue {
-        font-size: clamp(22px, 9vw, 40px);
+        font-size: clamp(18px, 6vw, 36px);
     }
     #bandeiraBox {
         padding: 6px 8px;
-        min-width: 55px;
-        right: 6px;
+        min-width: 54px;
     }
     #bandeiraNum {
-        font-size: clamp(18px, 7vw, 28px);
+        font-size: clamp(16px, 5vw, 24px);
+    }
+    #bandeiraLabel {
+        font-size: 8px;
+        letter-spacing: 0.5px;
+    }
+    #bandeiraBox #speedLabel {
+        font-size: 7px;
     }
     #tripInfo {
-        font-size: 10px;
-        gap: 4px;
+        font-size: 9px;
+        gap: 3px;
     }
-    #distanceLabel, #fracLabel, #timeLabel {
+    #tripInfo span {
         padding: 1px 5px;
     }
     .menu-btn {
         width: 32px;
         height: 32px;
         font-size: 16px;
-        left: 6px;
     }
 }
 

@@ -1204,26 +1204,26 @@ function showNavStep(step, index) {
 }
 
 function maneuverArrow(m) {
-    if (!m) return '&#10140;';
+    if (!m) return '\u279C';
     const type = m.type;
     const mod = m.modifier || '';
     if (type === 'turn' || type === 'continue') {
-        if (mod === 'left') return '&#8592;';
-        if (mod === 'right') return '&#8594;';
-        if (mod === 'sharp left') return '&#9001;';
-        if (mod === 'sharp right') return '&#9002;';
-        if (mod === 'slight left') return '&#8604;';
-        if (mod === 'slight right') return '&#8605;';
+        if (mod === 'left') return '\u2190';
+        if (mod === 'right') return '\u2192';
+        if (mod === 'sharp left') return '\u21A9';
+        if (mod === 'sharp right') return '\u21AA';
+        if (mod === 'slight left') return '\u219C';
+        if (mod === 'slight right') return '\u219D';
     }
     if (type === 'fork' || type === 'ramp' || type === 'exit') {
-        if (mod === 'left') return '&#8600;';
-        if (mod === 'right') return '&#8599;';
+        if (mod === 'left') return '\u2198';
+        if (mod === 'right') return '\u2197';
     }
-    if (type === 'roundabout' || type === 'rotary') return '&#8635;';
-    if (type === 'arrive') return '&#128205;';
-    if (type === 'depart') return '&#128204;';
-    if (type === 'merge') return '&#8604;';
-    return '&#10140;';
+    if (type === 'roundabout' || type === 'rotary') return '\u21BA';
+    if (type === 'arrive') return '\uD83D\uDCCD';
+    if (type === 'depart') return '\uD83D\uDCCC';
+    if (type === 'merge') return '\u219C';
+    return '\u279C';
 }
 
 function maneuverText(m) {

@@ -1041,8 +1041,14 @@ function onDestInput() {
     autocompleteList.classList.add('hidden');
     if (q.length < 3) return;
     autocompleteTimeout = setTimeout(() => {
-        fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) +
-            '&format=json&limit=5&accept-language=pt&addressdetails=1')
+        let url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) +
+            '&format=json&limit=5&accept-language=pt&addressdetails=1';
+        if (currentPos) {
+            const lat = currentPos[0], lng = currentPos[1];
+            const dLat = 0.15, dLng = 0.15 / Math.cos(lat * Math.PI / 180);
+            url += '&viewbox=' + (lng - dLng) + ',' + (lat - dLat) + ',' + (lng + dLng) + ',' + (lat + dLat);
+        }
+        fetch(url)
             .then(r => r.json())
             .then(data => {
                 if (!data || !data.length) return;

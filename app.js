@@ -1100,7 +1100,7 @@ function drawRouteOnMap() {
             const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
 
             routeLine = L.polyline(coords, {
-                color: '#ffd700', weight: 5, opacity: 0.9, dashArray: '12, 8'
+                color: '#ff1744', weight: 5, opacity: 0.9, dashArray: '12, 8'
             }).addTo(map);
 
             const startMarker = L.circleMarker([currentPos[0], currentPos[1]], {
@@ -1115,8 +1115,9 @@ function drawRouteOnMap() {
 
             const distKm = (route.distance / 1000).toFixed(1);
             const durMin = Math.round(route.duration / 60);
-            destInput.placeholder = distKm + ' km · ' + durMin + ' min — ' + _navName;
-            el('navModal').classList.add('hidden');
+            const routeFare = config.bandeirada + (parseFloat(distKm) * config.tarifa1);
+            destInput.placeholder = fmtMoney(routeFare) + ' · ' + distKm + ' km · ' + durMin + ' min';
+            $('navModal').classList.add('hidden');
         })
         .catch(() => {
             destInput.placeholder = 'Erro ao desenhar trajeto';

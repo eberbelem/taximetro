@@ -447,10 +447,16 @@ function updatePos(lat, lng, heading) {
         if (heading !== undefined) {
             lastHeading = heading;
         }
-        if (trip.active) setMarkerTaxi(lastHeading);
+        if (trip.active || isNavigating) setMarkerTaxi(lastHeading);
     }
     updateNavProgress(lat, lng);
-    if (map && !trip.active) map.panTo([lat, lng], { animate: true, duration: 0.5 });
+    if (map) {
+        if (isNavigating) {
+            map.panTo([lat, lng], { animate: true, duration: 0.3 });
+        } else if (!trip.active) {
+            map.panTo([lat, lng], { animate: true, duration: 0.5 });
+        }
+    }
 }
 
 function startGPS() {
@@ -514,7 +520,7 @@ function startSimulator() {
         lng += Math.sin(heading * Math.PI / 180) * step;
         const simSpeed = Math.random() * 40 + 5;
         trip.lastSpeed = simSpeed;
-        updatePos(lat, lng);
+        updatePos(lat, lng, heading);
         if (trip.active) {
             onTripMove(lat, lng, simSpeed);
         }
@@ -1182,6 +1188,8 @@ function startNavigation() {
             // Inicializa barra de progresso e info restante
             $('navProgressFill').style.width = '0%';
             $('navRemainingInfo').textContent = (navTotalDist / 1000).toFixed(1) + ' km restantes · ' + Math.round(navTotalDur) + ' min';
+            // Zoom no veículo (modo navegação tipo Waze)
+            map.setView([currentPos[0], currentPos[1]], 19, { animate: true, duration: 0.5 });
         })
         .catch(() => {});
 }

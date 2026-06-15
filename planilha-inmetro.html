@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilha de Cálculo - INMETRO nº 201/2002</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 22px;
+            color: #0f3460;
+            border-bottom: 3px solid #ffd700;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 16px;
+            color: #0f3460;
+            margin: 20px 0 10px;
+        }
+        h3 {
+            font-size: 14px;
+            color: #555;
+            margin: 15px 0 6px;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-left: 4px solid #0f3460;
+        }
+        .section.highlight {
+            border-left-color: #ffd700;
+            background: #fffde7;
+        }
+        .section.purple {
+            border-left-color: #6a1b9a;
+            background: #f3e5f5;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #0f3460;
+            color: #fff;
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background: #f8f9fa; }
+        .formula {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background: #e8eaf6;
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-size: 15px;
+            color: #283593;
+        }
+        .result {
+            font-family: 'Consolas', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+        .result-box {
+            display: inline-block;
+            background: #e8f5e9;
+            padding: 6px 16px;
+            border-radius: 6px;
+            margin: 4px 0;
+            font-size: 16px;
+        }
+        .nomen {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 4px 16px;
+            font-size: 14px;
+        }
+        .nomen dt {
+            font-weight: 700;
+            color: #0f3460;
+            font-family: 'Consolas', monospace;
+        }
+        .nomen dd {
+            color: #555;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-blue { background: #e3f2fd; color: #1565c0; }
+        .badge-green { background: #e8f5e9; color: #2e7d32; }
+        .badge-orange { background: #fff3e0; color: #e65100; }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .calc-app-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #0f3460;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .calc-app-link:hover {
+            background: #1a5276;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>PLANILHA PARA CÁLCULO — TAXÍMETROS</h1>
+    <p style="color:#666;margin-bottom:16px;">Portaria Inmetro nº 201/2002 &mdash; Decreto 27.527/2024 Camaquã/RS</p>
+
+    <!-- Valores -->
+    <div class="section">
+        <h2>1. VALORES ESTABELECIDOS (Decreto 27.527/2024)</h2>
+        <table>
+            <tr><td>Bandeirada (Ba)</td><td><strong>R$ 6,50</strong></td></tr>
+            <tr><td>Valor da Fração (f)</td><td><strong>R$ 0,25</strong></td></tr>
+            <tr><td>Tarifa Horária (TH)</td><td><strong>R$ 40,00/h</strong></td></tr>
+            <tr><td>Tarifa 1 - Bandeira 1 (B1)</td><td><strong>R$ 6,30/km</strong></td></tr>
+            <tr><td>Tarifa 2 - Bandeira 2 (B2)</td><td><strong>R$ 8,10/km</strong></td></tr>
+        </table>
+    </div>
+
+    <!-- Fórmulas -->
+    <div class="section highlight">
+        <h2>2. FORMULÁRIOS DE CÁLCULOS (INMETRO nº 201/2002)</h2>
+
+        <h3>Tarifa 1 (intervalo em metros)</h3>
+        <div class="formula">i1 = (f × 1000) / B1 = (0,25 × 1000) / 6,30</div>
+        <div class="result-box result">i1 = 39,68 m</div>
+
+        <h3>Tarifa 2 (intervalo em metros)</h3>
+        <div class="formula">i2 = (f × 1000) / B2 = (0,25 × 1000) / 8,10</div>
+        <div class="result-box result">i2 = 30,86 m</div>
+
+        <h3>Tarifa Horária (intervalo em segundos)</h3>
+        <div class="formula">iTH = (f × 3600) / TH = (0,25 × 3600) / 40,00</div>
+        <div class="result-box result">iTH = 22,5 s</div>
+    </div>
+
+    <!-- Cálculo da Distância para 1km -->
+    <div class="section">
+        <h2>3. CÁLCULO DA INDICAÇÃO: I = Ba + n × f</h2>
+
+        <h3>Tarifa 1 (Bandeira 1) para 1 km</h3>
+        <div class="formula">n = 1000 / i1 = 1000 / 39,68 ≈ 25,2 → n = 26 (múltiplo superior)</div>
+        <table>
+            <tr><th>Grandeza</th><th>Valor</th></tr>
+            <tr><td>n (número de frações para ≥ 1 km)</td><td><strong>26</strong></td></tr>
+            <tr><td>I = Ba + n × f</td><td><strong>R$ 6,50 + 26 × R$ 0,25 = R$ 13,00</strong></td></tr>
+            <tr><td>Dnf = n × i1</td><td><strong>26 × 39,68 ≈ 1032 m</strong></td></tr>
+            <tr><td>Dnf - EMA (-2%)</td><td>1011 m</td></tr>
+            <tr><td>Dnf + EMA (+2%)</td><td>1052 m</td></tr>
+        </table>
+        <p style="font-size:13px;color:#666;margin-top:4px;">* Valor por km efetivo: R$ 6,30/km conforme decreto</p>
+
+        <h3>Tarifa 2 (Bandeira 2) para 1 km</h3>
+        <div class="formula">n = 1000 / i2 = 1000 / 30,86 ≈ 32,4 → n = 33 (múltiplo superior)</div>
+        <table>
+            <tr><th>Grandeza</th><th>Valor</th></tr>
+            <tr><td>n (número de frações para ≥ 1 km)</td><td><strong>33</strong></td></tr>
+            <tr><td>I = Ba + n × f</td><td><strong>R$ 6,50 + 33 × R$ 0,25 = R$ 14,75</strong></td></tr>
+            <tr><td>Dnf = n × i2</td><td><strong>33 × 30,86 ≈ 1018 m</strong></td></tr>
+            <tr><td>Dnf - EMA (-2%)</td><td>998 m</td></tr>
+            <tr><td>Dnf + EMA (+2%)</td><td>1039 m</td></tr>
+        </table>
+        <p style="font-size:13px;color:#666;margin-top:4px;">* Valor por km efetivo: R$ 8,10/km conforme decreto</p>
+    </div>
+
+    <!-- Tarifa Horária -->
+    <div class="section highlight">
+        <h2>4. VERIFICAÇÃO NA TARIFA HORÁRIA</h2>
+        <div class="formula">I = Ba + 4f = 6,50 + 4 × 0,25</div>
+        <table>
+            <tr><th>Grandeza</th><th>Valor</th></tr>
+            <tr><td>Indicação (I)</td><td><strong>R$ 7,50</strong></td></tr>
+            <tr><td>T3 = (3 × f × 3600) / TH</td><td><strong>67,5 s</strong></td></tr>
+            <tr><td>T3 - EMA</td><td>63,8 s <span class="badge badge-orange">1 min 04 s</span></td></tr>
+            <tr><td>T3 (nominal)</td><td>67,5 s <span class="badge badge-green">1 min 08 s</span></td></tr>
+            <tr><td>T3 + EMA</td><td>71,3 s <span class="badge badge-blue">1 min 11 s</span></td></tr>
+        </table>
+    </div>
+
+    <!-- Nomenclatura -->
+    <div class="section purple">
+        <h2>5. NOMENCLATURA</h2>
+        <dl class="nomen">
+            <dt>n</dt> <dd>número de frações</dd>
+            <dt>Dnf</dt> <dd>distância correspondente a n frações, na tarifa correspondente</dd>
+            <dt>T3</dt> <dd>três vezes o intervalo de tempo de uma fração</dd>
+            <dt>TH</dt> <dd>tarifa horária em reais por hora</dd>
+            <dt>Ba</dt> <dd>bandeirada em reais</dd>
+            <dt>i1, i2, iTH</dt> <dd>intervalo de tempo/distância para uma fração na respectiva tarifa</dd>
+            <dt>nf</dt> <dd>valor múltiplo da fração imediatamente superior ao valor do quilômetro</dd>
+            <dt>f</dt> <dd>valor da fração, em reais</dd>
+            <dt>Tarifa</dt> <dd>valor da tarifa correspondente à distância nominal D</dd>
+            <dt>EMA</dt> <dd>erro máximo admissível (±2% para distância, ±5,56% para tempo)</dd>
+        </dl>
+    </div>
+
+    <!-- Link para o app -->
+    <div style="text-align:center;margin-top:20px;">
+        <a href="index.html" class="calc-app-link">&#9654; Abrir Taxímetro Digital</a>
+    </div>
+
+    <div class="footer">
+        Portaria Inmetro nº 201/2002 — Planilha de Cálculo Referencial<br>
+        Taxímetro Digital v1.0
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Taxímetro Digital - INMETRO</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+
+        <!-- ===== TELA PRINCIPAL ===== -->
+        <div id="mainScreen" class="screen active">
+            <div id="map"></div>
+
+            <!-- Topo: relógio + sinal -->
+            <div id="topBar">
+                <div id="topLeft">
+                    <span id="clockDisplay">13:45</span>
+                </div>
+                <div id="topRight">
+                    <span id="signalBars" title="4G">&#9679;&#9679;&#9679;&#9679;</span>
+                    <span id="topSimBadge" class="sim-badge hidden">SIMULAÇÃO</span>
+                </div>
+            </div>
+
+            <!-- Menu lateral -->
+            <div id="sideMenu" class="side-menu hidden">
+                <div class="side-overlay" id="sideOverlay"></div>
+                <div class="side-drawer">
+                    <div class="side-header">
+                        <span class="side-title">Taxímetro Digital</span>
+                        <button id="btnCloseMenu" class="icon-btn">&times;</button>
+                    </div>
+                    <div class="side-body">
+                        <div class="side-item" data-screen="financeiro">
+                            <span class="side-icon">&#128176;</span>
+                            <span>Financeiro</span>
+                        </div>
+                        <div class="side-item" data-screen="perfil">
+                            <span class="side-icon">&#128100;</span>
+                            <span>Dados do Motorista</span>
+                        </div>
+                        <div class="side-item" data-screen="historico">
+                            <span class="side-icon">&#128196;</span>
+                            <span>Histórico de Corridas</span>
+                        </div>
+                        <div class="side-item" data-screen="config">
+                            <span class="side-icon">&#9881;</span>
+                            <span>Configurações</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de destino -->
+            <div id="destinationBar">
+                <input type="text" id="destInput" placeholder="Digite o endereço..." />
+                <button id="btnNav" class="nav-btn" title="Abrir navegação">&#10148;</button>
+            </div>
+
+            <!-- Painel inferior: valor + bandeira interna -->
+            <div id="farePanel">
+                <div id="fareBox">
+                    <button id="btnMenu" class="menu-btn" title="Menu">&#9776;</button>
+                    <div id="fareCenter">
+                        <div id="fareLabel">VALOR A PAGAR</div>
+                        <div id="fareValue">R$ 6,50</div>
+                        <div id="tripInfo">
+                            <span id="distanceLabel">0,0 km</span>
+                            <span id="fracLabel">0 frações</span>
+                            <span id="timeLabel">00:00</span>
+                        </div>
+                        <div id="waitInfo" class="hidden">
+                            <span id="waitLabel">Tempo parado: 0 s</span>
+                        </div>
+                    </div>
+                    <div id="bandeiraBox">
+                        <div id="bandeiraLabel">BANDEIRA</div>
+                        <div id="bandeiraNum">1</div>
+                        <div id="speedLabel">0 km/h</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles inferiores -->
+            <div id="controlsBar">
+                <button id="btnStart" class="ctrl-btn start">INICIAR</button>
+                <button id="btnStop" class="ctrl-btn stop" disabled>ENCERRAR</button>
+            </div>
+
+            <!-- Imprimir recibo -->
+            <button id="btnPrintRecibo" class="fab-print hidden" title="Imprimir Recibo">&#128424;</button>
+        </div>
+
+        </div>
+
+        <!-- ===== MODAL RESUMO DA CORRIDA ===== -->
+        <div id="summaryModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-icon">&#9989;</span>
+                    <h2>CORRIDA FINALIZADA</h2>
+                </div>
+                <div class="modal-body">
+                    <div class="summary-row">
+                        <span class="summary-label">&#128205; Embarque</span>
+                        <span id="summaryEmbEnd" class="summary-value">—</span>
+                        <span id="summaryEmbHora" class="summary-time">—</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">&#128204; Desembarque</span>
+                        <span id="summaryDescEnd" class="summary-value">—</span>
+                        <span id="summaryDescHora" class="summary-time">—</span>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Distância</span>
+                            <span id="summaryDist" class="stat-value">0,0 km</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Tempo</span>
+                            <span id="summaryTempo" class="stat-value">00:00</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Bandeira</span>
+                            <span id="summaryBandeira" class="stat-value">1</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Frações</span>
+                            <span id="summaryFracoes" class="stat-value">0</span>
+                        </div>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-total">
+                        <span>TOTAL A PAGAR</span>
+                        <span id="summaryTotal" class="total-value">R$ 0,00</span>
+                    </div>
+                    <div class="summary-params">
+                        <span id="summaryParams">Ba: R$ 6,50 | f: R$ 0,25 | i1: 39,68 m | iTH: 22,5 s</span>
+                    </div>
+                    <div class="summary-driver" id="summaryDriver"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnFecharResumo" class="ctrl-btn">NOVA CORRIDA</button>
+                    <button id="btnImprimir" class="ctrl-btn print-btn">&#128424; IMPRIMIR RECIBO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== RECIBO OCULTO (para impressão térmica 50mm) ===== -->
+        <div id="receiptContent" class="hidden">
+            <div id="receiptInner">
+                <div class="receipt-header">
+                    <div class="receipt-title">TAXÍMETRO DIGITAL</div>
+                    <div class="receipt-sub">Portaria Inmetro nº 201/2002</div>
+                    <div class="receipt-driver" id="rDriver">Taxista: — | Prefixo: —</div>
+                    <div class="receipt-line">================================</div>
+                </div>
+                <div class="receipt-body">
+                    <div class="receipt-row"><span class="r-label">Embarque:</span><span class="r-value" id="rEmbEnd">—</span></div>
+                    <div class="receipt-row"><span class="r-label">Horário:</span><span class="r-value" id="rEmbHora">—</span></div>
+                    <div class="receipt-divider">--------------------------------</div>
+                    <div class="receipt-row"><span class="r-label">Desembarque:</span><span class="r-value" id="rDescEnd">—</span></div>
+                    <div class="receipt-row"><span class="r-label">Horário:</span><span class="r-value" id="rDescHora">—</span></div>
+                    <div class="receipt-divider">--------------------------------</div>
+                    <div class="receipt-row"><span class="r-label">Bandeira:</span><span class="r-value" id="rBandeira">1</span></div>
+                    <div class="receipt-row"><span class="r-label">Distância:</span><span class="r-value" id="rDist">0,0 km</span></div>
+                    <div class="receipt-row"><span class="r-label">Tempo:</span><span class="r-value" id="rTempo">00:00</span></div>
+                    <div class="receipt-row"><span class="r-label">Frações:</span><span class="r-value" id="rFracoes">0</span></div>
+                    <div class="receipt-divider">================================</div>
+                    <div class="receipt-total">
+                        <span>VALOR TOTAL</span>
+                        <span id="rTotal">R$ 0,00</span>
+                    </div>
+                    <div class="receipt-divider">================================</div>
+                    <div class="receipt-params" id="rParams">Ba R$ 6,50 | f R$ 0,25</div>
+                    <div class="receipt-footer">
+                        <div>Obrigado pela corrida!</div>
+                        <div class="receipt-date" id="rData">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TELA DO HISTÓRICO ===== -->
+        <div id="historyScreen" class="screen">
+            <div id="configHeader">
+                <button id="btnBackHistory" class="icon-btn">&#x2190;</button>
+                <h2>Histórico de Corridas</h2>
+                <button id="btnClearHistory" class="icon-btn" title="Limpar histórico" style="font-size:16px;">&#128465;</button>
+                <button id="btnExportCSV" class="icon-btn" title="Exportar CSV" style="font-size:16px;">&#128229;</button>
+            </div>
+            <div id="historyFilters" class="history-filters">
+                <button class="filter-btn active" data-period="dia">Hoje</button>
+                <button class="filter-btn" data-period="semana">Semana</button>
+                <button class="filter-btn" data-period="mes">Mês</button>
+                <button class="filter-btn" data-period="periodo">Período</button>
+            </div>
+            <div id="historyDateRange" class="history-date-range hidden">
+                <input type="date" id="histDateStart" />
+                <span>até</span>
+                <input type="date" id="histDateEnd" />
+                <button id="btnFilterPeriod" class="filter-btn">Filtrar</button>
+            </div>
+            <div id="historyList" class="history-list"></div>
+        </div>
+
+        <!-- ===== MODAL DETALHE DO HISTÓRICO ===== -->
+        <div id="historyDetailModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-icon">&#128203;</span>
+                    <h2>DETALHE DA CORRIDA</h2>
+                </div>
+                <div class="modal-body">
+                    <div class="summary-row">
+                        <span class="summary-label">&#128205; Embarque</span>
+                        <span id="hDetStartAddr" class="summary-value">—</span>
+                        <span id="hDetStart" class="summary-time">—</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">&#128204; Desembarque</span>
+                        <span id="hDetEndAddr" class="summary-value">—</span>
+                        <span id="hDetEnd" class="summary-time">—</span>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Distância</span>
+                            <span id="hDetDist" class="stat-value">0,0 km</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Valor</span>
+                            <span id="hDetFare" class="stat-value">R$ 0,00</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Frações</span>
+                            <span id="hDetFrac" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Bandeira</span>
+                            <span id="hDetBandeira" class="stat-value">1</span>
+                        </div>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-total">
+                        <span>Taxista</span>
+                        <span id="hDetDriver" class="total-value" style="font-size:14px;color:#ffd700;">—</span>
+                    </div>
+                    <div class="summary-params">
+                        <span id="hDetParams"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCloseHistDet" class="ctrl-btn">FECHAR</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TELA DO PERFIL ===== -->
+        <div id="profileScreen" class="screen">
+            <div id="configHeader">
+                <button id="btnBackProfile" class="icon-btn">&#x2190;</button>
+                <h2>Meus Dados</h2>
+            </div>
+            <div class="config-panel">
+                <div class="setting-group">
+                    <h3>&#128100; Identificação do Taxista</h3>
+                    <label>Taxista:
+                        <input type="text" id="profNome" placeholder="Nome completo" maxlength="60" />
+                    </label>
+                    <label>Carro:
+                        <input type="text" id="profCarro" placeholder="Ex: Toyota Corolla 2024" maxlength="40" />
+                    </label>
+                    <label>Placa:
+                        <input type="text" id="profPlaca" placeholder="Ex: ABC-1234" maxlength="8" style="text-transform:uppercase" />
+                    </label>
+                    <label>Prefixo:
+                        <input type="text" id="profPrefixo" placeholder="Ex: TAXI-1234" maxlength="20" />
+                    </label>
+                </div>
+                <button id="btnSaveProfile" class="ctrl-btn save-btn">SALVAR MEUS DADOS</button>
+                <p id="profileMsg" class="success-msg"></p>
+            </div>
+        </div>
+
+        <!-- ===== TELA FINANCEIRO ===== -->
+        <div id="financeScreen" class="screen">
+            <div id="configHeader">
+                <button id="btnBackFinance" class="icon-btn">&#x2190;</button>
+                <h2>Financeiro</h2>
+            </div>
+            <div class="config-panel">
+
+                <div id="financeResumo" class="finance-resumo">
+                    <div class="fin-item">
+                        <span class="fin-label">GANHOS (corridas)</span>
+                        <span id="finGanhos" class="fin-val pos">R$ 0,00</span>
+                    </div>
+                    <div class="fin-item">
+                        <span class="fin-label">GASTOS</span>
+                        <span id="finGastos" class="fin-val neg">R$ 0,00</span>
+                    </div>
+                    <div class="fin-divider"></div>
+                    <div class="fin-item">
+                        <span class="fin-label">SALDO</span>
+                        <span id="finSaldo" class="fin-val">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>&#9981; Abastecimento</h3>
+                    <label>Preço do litro (R$):
+                        <input type="number" id="finPrecoLitro" step="0.01" min="0" placeholder="Ex: 6,59" />
+                    </label>
+                    <label>Km por litro do veículo:
+                        <input type="number" id="finKmLitro" step="0.1" min="0" placeholder="Ex: 12,5" />
+                    </label>
+                    <label>Litros abastecidos:
+                        <input type="number" id="finLitros" step="0.1" min="0" placeholder="Ex: 45" />
+                    </label>
+                    <button id="btnAddFuel" class="ctrl-btn save-btn">ADICIONAR ABASTECIMENTO</button>
+                    <p id="fuelMsg" class="success-msg"></p>
+                </div>
+
+                <div class="setting-group">
+                    <h3>&#128295; Manutenção</h3>
+                    <label>Descrição:
+                        <input type="text" id="finManutDesc" placeholder="Ex: Troca de óleo" maxlength="60" />
+                    </label>
+                    <label>Valor (R$):
+                        <input type="number" id="finManutValor" step="0.01" min="0" placeholder="Ex: 250,00" />
+                    </label>
+                    <button id="btnAddManut" class="ctrl-btn save-btn">ADICIONAR MANUTENÇÃO</button>
+                    <p id="manutMsg" class="success-msg"></p>
+                </div>
+
+                <div class="setting-group">
+                    <h3>&#128221; Últimos Lançamentos</h3>
+                    <div id="financeList" class="finance-list">
+                        <div class="finance-empty">Nenhum lançamento ainda.</div>
+                    </div>
+                    <button id="btnClearFinance" class="ctrl-btn" style="background:#c62828;margin-top:8px;">LIMPAR TUDO</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===== TELA DE CONFIGURAÇÕES ===== -->
+        <div id="configScreen" class="screen">
+            <div id="configHeader">
+                <button id="btnBackMain" class="icon-btn">&#x2190;</button>
+                <h2>Configurações</h2>
+                <span id="configStatus" class="status-badge">LOCAL</span>
+            </div>
+
+            <!-- Login -->
+            <div id="loginPanel" class="config-panel">
+                <div class="lock-icon">&#128274;</div>
+                <h3>Acesso Restrito</h3>
+                <p class="subtitle">Apenas oficinas credenciadas pelo INMETRO</p>
+                <input type="password" id="pwdInput" placeholder="Senha de 6 dígitos" maxlength="6" />
+                <button id="btnLogin" class="ctrl-btn login-btn">ENTRAR</button>
+                <p id="loginError" class="error-msg"></p>
+            </div>
+
+            <!-- Configurações -->
+            <div id="settingsPanel" class="config-panel hidden">
+                <p class="subtitle" style="margin-bottom:16px;">Portaria Inmetro nº 201/2002</p>
+
+                <div class="setting-group">
+                    <h3>&#9881; Valores Estabelecidos</h3>
+
+                    <label>Bandeirada (Ba) - R$:
+                        <input type="number" id="cfgBandeirada" step="0.01" min="0" />
+                    </label>
+                    <label>Valor da Fração (f) - R$:
+                        <input type="number" id="cfgFracao" step="0.01" min="0" />
+                    </label>
+                    <label>Tarifa 1 (B1) - R$/km:
+                        <input type="number" id="cfgTarifa1" step="0.01" min="0" />
+                    </label>
+                    <label>Tarifa 2 (B2) - R$/km:
+                        <input type="number" id="cfgTarifa2" step="0.01" min="0" />
+                    </label>
+                    <label>Tarifa Horária (TH) - R$/h:
+                        <input type="number" id="cfgTarifaHoraria" step="0.01" min="0" />
+                    </label>
+                </div>
+
+                <div class="setting-group">
+                    <h3>&#128202; Intervalos Calculados (i)</h3>
+                    <div class="calc-result">
+                        <span>i1 (Tarifa 1):</span>
+                        <strong id="calcI1">—</strong>
+                    </div>
+                    <div class="calc-result">
+                        <span>i2 (Tarifa 2):</span>
+                        <strong id="calcI2">—</strong>
+                    </div>
+                    <div class="calc-result">
+                        <span>iTH (Tarifa Horária):</span>
+                        <strong id="calcITH">—</strong>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>&#128197; Horário Bandeira 2</h3>
+                    <label>Início:
+                        <input type="time" id="cfgHoraInicio" />
+                    </label>
+                    <label>Fim:
+                        <input type="time" id="cfgHoraFim" />
+                    </label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="cfgSabado" /> Sábados</label>
+                        <label><input type="checkbox" id="cfgDomingo" /> Domingos</label>
+                        <label><input type="checkbox" id="cfgFeriado" /> Feriados</label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>&#128273; Senha de Configuração</h3>
+                    <label>Nova senha (6 dígitos):
+                        <input type="password" id="cfgNewPwd" maxlength="6" />
+                    </label>
+                </div>
+
+                <button id="btnSaveConfig" class="ctrl-btn save-btn">SALVAR CONFIGURAÇÕES</button>
+                <p id="configMsg" class="success-msg"></p>
+
+                <div class="setting-group remote-group">
+                    <h3>&#127760; Acesso Remoto Master</h3>
+                    <p class="subtitle">Configuração via internet por órgão autorizado (INMETRO)</p>
+                    <button id="btnRemoteSync" class="ctrl-btn remote-btn">SINCRONIZAR COM SERVIDOR</button>
+                    <p id="remoteMsg" class="info-msg"></p>
+                    <div id="remoteLog" class="remote-log hidden"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

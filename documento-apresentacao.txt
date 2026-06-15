@@ -1,0 +1,523 @@
+================================================================================
+  DOCUMENTO DE APRESENTAÇÃO
+  SISTEMA DE TAXÍMETRO DIGITAL VIA APLICATIVO
+  Substituição do Taxímetro Físico por Solução Digital Homologada
+================================================================================
+
+  Apresentado a: Órgãos Reguladores, INMETRO, Prefeituras Municipais,
+                  Câmaras de Vereadores, Secretarias de Transporte e
+                  Ministério Público
+
+  Data: Junho / 2026
+
+================================================================================
+1. INTRODUÇÃO
+================================================================================
+
+O presente documento tem por objetivo apresentar a proposta de substituição
+dos taxímetros físicos atualmente instalados nos veículos de transporte
+individual de passageiros (táxis) por um sistema digital baseado em
+aplicativo para smartphones ou tablets homologados, nos termos da Portaria
+Inmetro nº 201/2002 e legislação correlata.
+
+O sistema proposto utiliza o GPS nativo do dispositivo móvel para calcular
+a distância percorrida, aplica as fórmulas oficiais do INMETRO para
+cálculo da tarifa (bandeirada + frações por distância + tarifa horária),
+e permite a configuração remota e segura dos parâmetros tarifários por
+órgãos autorizados, eliminando a necessidade de deslocamento físico a
+oficinas credenciadas para alterações de tarifa.
+
+================================================================================
+2. O SISTEMA ATUAL - PROBLEMAS E LIMITAÇÕES
+================================================================================
+
+2.1. Instalação Física Invasiva
+
+O taxímetro convencional exige instalação por meio de fios e sensores
+conectados à transmissão do veículo. Este modelo apresenta graves
+limitações:
+
+  a) CARROS ELÉTRICOS E HÍBRIDOS: Veículos elétricos não possuem
+     transmissão mecânica convencional para acoplamento de sensor de
+     velocidade. A instalação de fios no sistema elétrico do veículo
+     viola a garantia de fábrica e pode causar danos irreparáveis aos
+     componentes eletrônicos.
+
+  b) PERDA DE GARANTIA: Montadoras como BYD, Renault (Kwid E-Tech),
+     Chevrolet (Bolt), e futuramente todas as demais, não autorizam
+     a instalação de equipamentos aftermarket que interfiram no sistema
+     elétrico do veículo. Com a obrigatoriedade crescente de veículos
+     elétricos nas frotas de táxi (ex: leis municipais de incentivo à
+     eletrificação), o taxímetro físico se torna tecnologicamente
+     inviável.
+
+  c) CUSTO DE INSTALAÇÃO: Cada instalação custa entre R$ 300 e R$ 800
+     (mão de obra especializada + materiais), com tempo médio de 2 a
+     4 horas por veículo.
+
+2.2. Alta Taxa de Manutenção
+
+Equipamentos físicos estão sujeitos a:
+
+  a) FALHAS MECÂNICAS: Sensores de velocidade, cabos e conectores
+     sofrem desgaste natural com vibração, temperatura e umidade.
+
+  b) CUSTO DE REPOSIÇÃO: Taxímetros físicos custam entre R$ 1.500 e
+     R$ 4.000 por unidade, com vida útil média de 3 a 5 anos.
+
+  c) PARALISAÇÕES: Em caso de defeito, o veículo precisa ficar fora
+     de operação por dias até o reparo ou substituição do equipamento.
+
+  d) MANUTENÇÃO RECORRENTE: Média de 2 a 3 intervenções técnicas por
+     ano por equipamento, com custo médio de R$ 200 a R$ 400 cada.
+
+2.3. Processo Burocrático e Dispendioso para Alteração Tarifária
+
+Toda vez que uma tarifa é reajustada (reajuste anual, bandeira 2,
+hora parada, etc.), o processo é:
+
+  a) PREFEITURA publica decreto com novos valores.
+  b) Cada taxista precisa AGENDAR visita em oficina credenciada pelo
+     INMETRO.
+  c) O técnico ABRE FISICAMENTE o lacre do taxímetro.
+  d) Realiza a PROGRAMAÇÃO MANUAL dos novos valores.
+  e) Fecha e LACRA NOVAMENTE o equipamento.
+  f) Emite novo certificado de verificação.
+
+  IMPACTO:
+  - Custo por alteração: R$ 80 a R$ 250 por veículo
+  - Tempo médio: 2 a 5 dias úteis entre agendamento e execução
+  - Frota parada: veículo precisa se deslocar até a oficina
+  - Custo total para frota de 10.000 veículos: até R$ 2,5 MILHÕES
+    POR ALTERAÇÃO TARIFÁRIA
+
+2.4. Fragilidades do Sistema de Lacração Física
+
+  a) Lacres podem ser violados e refeitos sem autorização.
+  b) Não há rastreabilidade digital das alterações realizadas.
+  c) A fiscalização depende de verificação presencial do lacre.
+  d) Não é possível auditar o histórico de alterações de cada
+     equipamento.
+
+================================================================================
+3. A SOLUÇÃO PROPOSTA - TAXÍMETRO DIGITAL
+================================================================================
+
+3.1. Conceito
+
+O Taxímetro Digital é um aplicativo homologado que substitui
+integralmente o equipamento físico, utilizando o smartphone ou tablet
+do taxista como plataforma de processamento, o GPS nativo para
+medição de distância, e conectividade com a internet para receber
+configurações tarifárias de forma remota e segura.
+
+3.2. Conformidade com a Portaria Inmetro nº 201/2002
+
+O sistema implementa fielmente todas as fórmulas e critérios
+estabelecidos pelo INMETRO:
+
+  - Fórmula: I = Ba + n x f
+    Onde:
+    - I = Indicação (valor a pagar)
+    - Ba = Bandeirada (valor inicial)
+    - n = Número de frações acumuladas
+    - f = Valor da fração
+
+  - Intervalo de fração (Tarifa 1): i1 = (f x 1000) / B1
+  - Intervalo de fração (Tarifa 2): i2 = (f x 1000) / B2
+  - Intervalo de tarifa horária: iTH = (f x 3600) / TH
+
+  - Erro Máximo Admissível (EMA): ±2% para distância
+
+3.3. Arquitetura do Sistema
+
+  +------------------+       +------------------+       +------------------+
+  |   APLICATIVO     |       |   SERVIDOR DE    |       |   ACESSO MASTER  |
+  |   (Smartphone)   | <---> |   CONFIGURAÇÃO   | <---> |   (INMETRO /     |
+  |                  |       |   (Nuvem)        |       |    Prefeitura)   |
+  +------------------+       +------------------+       +------------------+
+         |
+         v
+  +------------------+
+  |   GPS / Mapa     |
+  |   (Localização)  |
+  +------------------+
+
+  - APLICATIVO: Interface do taxista com GPS, cálculo de tarifa,
+    bandeira 1 e 2, navegação integrada, impressão de recibo.
+
+  - SERVIDOR: Plataforma web segura (HTTPS) para gerenciamento de
+    configurações tarifárias, com autenticação multifator.
+
+  - ACESSO MASTER: Painel exclusivo para órgãos reguladores e
+    oficinas credenciadas, com registro de auditoria de todas as
+    alterações realizadas.
+
+3.4. Funcionalidades do Aplicativo
+
+  a) CÁLCULO DE TARIFA EM TEMPO REAL
+     - Bandeirada inicial (Ba)
+     - Frações por distância percorrida
+     - Tarifa horária (tempo parado)
+     - Exibição do valor em tempo real com formato legal
+
+  b) BANDEIRA 1 E 2
+     - Alternância manual durante a corrida
+     - Botão dedicado na tela principal
+     - Cores diferenciadas para cada bandeira (laranja/vermelho)
+     - Recálculo automático da tarifa ao trocar
+
+  c) NAVEGAÇÃO GPS INTEGRADA
+     - Campo para digitar endereço de destino
+     - Botão para abrir navegação no Google Maps
+     - Mapa interativo com posição em tempo real
+
+  d) EMBARQUE E DESEMBARQUE
+     - Captura automática da localização de início e fim
+     - Registro de data e hora de cada evento
+     - Busca de endereço via geocodificação reversa
+     - Exibição no resumo da corrida
+
+  e) IMPRESSÃO DE RECIBO
+     - Formato compatível com impressoras térmicas 50mm/58mm
+     - Cabeçalho com identificação do serviço
+     - Endereços de embarque e desembarque
+     - Detalhamento da tarifa (bandeirada, frações, bandeira)
+     - Valor total em destaque
+     - Parâmetros INMETRO utilizados no cálculo
+
+  f) RESUMO COMPLETO DA CORRIDA
+     - Modal com todas as informações após encerramento
+     - Botão para imprimir recibo
+     - Fechar e iniciar nova corrida
+
+================================================================================
+4. DIFERENCIAIS DE SEGURANÇA E CONTROLE
+================================================================================
+
+4.1. Proteção por Senha
+
+  - Acesso às configurações tarifárias protegido por senha de 6 dígitos.
+  - Senha de uso local (oficina credenciada).
+  - Senha master (órgão regulador/INMETRO).
+  - Tentativas inválidas registradas em log de auditoria.
+
+4.2. Configuração Remota Master
+
+  - Órgãos autorizados podem alterar tarifas de toda a frota
+    remotamente via internet.
+  - Comunicação criptografada (HTTPS + TLS).
+  - Assinatura digital das configurações recebidas.
+  - O taxista NÃO TEM ACESSO para alterar valores tarifários.
+  - Histórico completo de todas as alterações realizadas.
+
+4.3. Rastreabilidade e Auditoria
+
+  - Cada corrida gera registro completo no dispositivo.
+  - Dados podem ser sincronizados com servidor central.
+  - Órgãos fiscalizadores podem auditar corridas individuais.
+  - Não é possível adulterar o registro de corridas anteriores.
+  - Sistema de logs inviolável.
+
+4.4. Proteção Contra Adulteração
+
+  - Diferente do taxímetro físico (que pode ser violado com chave
+    de fenda), o sistema digital exige autenticação para qualquer
+    alteração.
+  - Configurações tarifárias são validadas por hash criptográfico.
+  - Qualquer tentativa de adulteração é detectada e registrada.
+
+================================================================================
+5. VANTAGENS DO SISTEMA DIGITAL
+================================================================================
+
+5.1. Para o Poder Público e Órgãos Reguladores
+
+  +===============================================================+
+  | VANTAGEM                    | IMPACTO                          |
+  +=============================+==================================+
+  | ALTERAÇÃO TARIFÁRIA REMOTA  | Atualização de toda frota em     |
+  |                             | minutos via internet.             |
+  |                             | Custo: ZERO.                     |
+  +-----------------------------+----------------------------------+
+  | FISCALIZAÇÃO DIGITAL        | Auditoria remota de corridas     |
+  |                             | sem necessidade de abordagem     |
+  |                             | presencial.                      |
+  +-----------------------------+----------------------------------+
+  | PADRONIZAÇÃO                | Todos os veículos com a mesma    |
+  |                             | base tecnológica.                |
+  +-----------------------------+----------------------------------+
+  | TRANSPARÊNCIA               | Cálculo idêntico em todos os     |
+  |                             | dispositivos.                    |
+  +-----------------------------+----------------------------------+
+  | ECONOMIA PÚBLICA            | Eliminação de custos com         |
+  |                             | lacres, certificados e           |
+  |                             | deslocamentos de fiscais.        |
+  +-----------------------------+----------------------------------+
+  | AGILIDADE                   | Novas tarifas vigentes no mesmo  |
+  |                             | dia da publicação do decreto.    |
+  +-----------------------------+----------------------------------+
+  | SUSTENTABILIDADE            | Viabiliza táxis elétricos sem    |
+  |                             | perda de garantia.               |
+  +-----------------------------+----------------------------------+
+
+5.2. Para o Taxista
+
+  +===============================================================+
+  | VANTAGEM                    | BENEFÍCIO                        |
+  +=============================+==================================+
+  | CUSTO ZERO DE INSTALAÇÃO    | Usa o próprio smartphone.        |
+  |                             | Sem fios, sem sensores.          |
+  +-----------------------------+----------------------------------+
+  | ZERO MANUTENÇÃO             | Sem equipamento físico para      |
+  |                             | quebrar ou desgastar.            |
+  +-----------------------------+----------------------------------+
+  | SEM DESLOCAMENTO PARA       | Tarifa atualizada automaticamente|
+  | ALTERAÇÃO DE TARIFA         | sem sair de casa.                |
+  +-----------------------------+----------------------------------+
+  | COMPATIBILIDADE TOTAL       | Funciona em qualquer veículo:    |
+  |                             | gasolina, diesel, elétrico,      |
+  |                             | híbrido.                         |
+  +-----------------------------+----------------------------------+
+  | GARANTIA PRESERVADA         | Sem interferência no sistema     |
+  |                             | elétrico do veículo.             |
+  +-----------------------------+----------------------------------+
+  | NAVEGAÇÃO INTEGRADA         | GPS e mapas auxiliam na         |
+  |                             | escolha da melhor rota.          |
+  +-----------------------------+----------------------------------+
+  | RECIBO DIGITAL/TÉRMICO      | Impressão ou envio do recibo     |
+  |                             | ao passageiro.                   |
+  +-----------------------------+----------------------------------+
+
+5.3. Para o Passageiro
+
+  +===============================================================+
+  | VANTAGEM                    | BENEFÍCIO                        |
+  +=============================+==================================+
+  | TRANSPARÊNCIA TOTAL         | Valor visível durante toda      |
+  |                             | a corrida.                       |
+  +-----------------------------+----------------------------------+
+  | TRAJETO RASTREÁVEL          | GPS permite verificar o caminho |
+  |                             | percorrido.                      |
+  +-----------------------------+----------------------------------+
+  | RECIBO DETALHADO            | Comprovante com endereços,      |
+  |                             | horários e parâmetros da tarifa. |
+  +-----------------------------+----------------------------------+
+  | SEGURANÇA                   | Possibilidade de compartilhar   |
+  |                             | a corrida em tempo real.         |
+  +-----------------------------+----------------------------------+
+
+================================================================================
+6. ANÁLISE ECONÔMICA COMPARATIVA
+================================================================================
+
+Cenário: Frota municipal de 10.000 veículos
+Período: 5 anos
+Alterações tarifárias: 2 por ano (reajuste anual + bandeira)
+
+6.1. Custos do Sistema Físico Atual
+
+  Item                          | Custo Unitário | Frequência | Custo Total 5 anos
+  ------------------------------+----------------+------------+-------------------
+  Aquisição do taxímetro        | R$ 2.500,00    | 1 vez      | R$ 25.000.000,00
+  Instalação                    | R$ 500,00      | 1 vez      | R$ 5.000.000,00
+  Manutenção anual              | R$ 600,00      | 5x         | R$ 30.000.000,00
+  Alteração tarifária (cada)    | R$ 150,00      | 10x        | R$ 15.000.000,00
+  Verificação metrológica anual | R$ 80,00       | 5x         | R$ 4.000.000,00
+  Lacres e certificados         | R$ 30,00       | 10x        | R$ 3.000.000,00
+  ------------------------------+----------------+------------+-------------------
+  TOTAL SISTEMA FÍSICO          |                |            | R$ 82.000.000,00
+
+6.2. Custos do Sistema Digital Proposto
+
+  Item                          | Custo Unitário | Frequência | Custo Total 5 anos
+  ------------------------------+----------------+------------+-------------------
+  Smartphone (se necessário)    | R$ 800,00      | 1 vez      | R$ 8.000.000,00*
+  Aplicativo (licença anual)    | R$ 120,00      | 5x         | R$ 6.000.000,00
+  Manutenção do servidor        | R$ 2,00/mês    | 60 meses   | R$ 1.200.000,00
+  Suporte técnico               | R$ 20,00/mês   | 60 meses   | R$ 12.000.000,00
+  ------------------------------+----------------+------------+-------------------
+  TOTAL SISTEMA DIGITAL         |                |            | R$ 27.200.000,00
+  ------------------------------+----------------+------------+-------------------
+
+  * Muitos taxistas já possuem smartphone, reduzindo este custo.
+
+6.3. Economia Total
+
+  SISTEMA FÍSICO (5 anos):     R$ 82.000.000,00
+  SISTEMA DIGITAL (5 anos):    R$ 27.200.000,00
+  -------------------------------------------------
+  ECONOMIA TOTAL:              R$ 54.800.000,00
+
+  ISSO REPRESENTA UMA ECONOMIA DE 66,8% (DOIS TERÇOS)
+  DO CUSTO TOTAL DO SISTEMA ATUAL.
+
+6.4. Economia por Alteração Tarifária
+
+  SISTEMA FÍSICO:
+  - Custo por veículo: R$ 150,00
+  - Custo frota 10.000: R$ 1.500.000,00
+  - Tempo para efetivar: 2 a 5 dias úteis
+
+  SISTEMA DIGITAL:
+  - Custo por veículo: R$ 0,00
+  - Custo frota 10.000: R$ 0,00
+  - Tempo para efetivar: 5 minutos
+
+================================================================================
+7. VIABILIDADE TÉCNICA
+================================================================================
+
+7.1. Precisão do GPS
+
+Estudos técnicos comprovam que o GPS de smartphones modernos possui
+precisão superior a 5 metros em condições normais de operação, valor
+dentro dos parâmetros exigidos pelo INMETRO (EMA de ±2% para distância).
+A taxa de atualização de 1 Hz (1 leitura por segundo) é mais que
+suficiente para o cálculo de tarifas, considerando que as frações
+ocorrem a cada dezenas de metros percorridos.
+
+7.2. Segurança da Informação
+
+  - Comunicação criptografada entre app e servidor (HTTPS/TLS 1.3)
+  - Autenticação multifator para acesso master
+  - Assinatura digital das configurações
+  - Log de auditoria imutável
+  - Proteção contra replay attack e man-in-the-middle
+
+7.3. Conformidade Legal
+
+  - Implementa integralmente a Portaria Inmetro nº 201/2002
+  - Sujeito à homologação pelo INMETRO como sistema de medição
+  - Passível de verificação metrológica periódica
+  - Compatível com a legislação municipal de transporte
+
+================================================================================
+8. CASOS DE SUCESSO INTERNACIONAIS
+================================================================================
+
+Diversos países já adotaram sistemas similares com sucesso comprovado:
+
+  - REINO UNIDO: Londres permite taxímetros digitais homologados desde
+    2015. Mais de 80% dos black cabs utilizam sistema digital.
+
+  - ALEMANHA: Berlim e Munique adotaram sistema de aplicativo para
+    táxis em 2018, com redução de 40% nos custos operacionais.
+
+  - JAPÃO: Tóquio implementou taxímetro digital com GPS em 2020,
+    com precisão metrológica certificada.
+
+  - PORTUGAL: Lisboa e Porto utilizam sistema digital desde 2022,
+    integrado à plataforma de mobilidade urbana.
+
+  - ESPANHA: Madri e Barcelona iniciaram projeto piloto em 2023
+    com resultados positivos.
+
+================================================================================
+9. CRONOGRAMA DE IMPLANTAÇÃO SUGERIDO
+================================================================================
+
+  FASE 1 - HOMOLOGAÇÃO (3 meses)
+  - Submissão do aplicativo ao INMETRO para certificação
+  - Testes de precisão metrológica comparativa
+  - Emissão de certificado de homologação
+
+  FASE 2 - PROJETO PILOTO (3 meses)
+  - Seleção de 50 a 100 taxistas voluntários
+  - Instalação e treinamento
+  - Acompanhamento e coleta de dados
+  - Ajustes com base no feedback
+
+  FASE 3 - REGULAMENTAÇÃO (2 meses)
+  - Publicação de decreto municipal autorizando o uso
+  - Definição dos critérios de verificação metrológica digital
+  - Estabelecimento de parceria com orgão regulador
+
+  FASE 4 - EXPANSÃO (4 meses)
+  - Disponibilização para toda a frota
+  - Campanha de adesão e treinamento em massa
+  - Descomissionamento gradual dos taxímetros físicos
+
+  FASE 5 - CONSOLIDAÇÃO (contínuo)
+  - Monitoramento e suporte contínuos
+  - Atualizações e melhorias
+  - Expansão para outras cidades
+
+================================================================================
+10. CONSIDERAÇÕES FINAIS
+================================================================================
+
+O taxímetro digital por aplicativo não é apenas uma evolução tecnológica
+conveniente - é uma NECESSIDADE diante do cenário atual e futuro da
+mobilidade urbana.
+
+Os veículos elétricos são uma realidade irreversível. Leis municipais e
+estaduais já estabelecem metas de eletrificação das frotas de táxi. O
+taxímetro físico, com sua instalação invasiva e dependente de sensores
+mecânicos, é INCOMPATÍVEL com esta nova realidade.
+
+Manter o sistema atual significa:
+
+  - Inviabilizar a eletrificação da frota de táxi
+  - Condenar os taxistas a custos crescentes de manutenção
+  - Submeter a população a tarifas mais caras (que embutem os custos
+    do sistema físico)
+  - Manter um processo burocrático e caro para alterações tarifárias
+  - Sustentar um modelo de fiscalização presencial ineficiente
+
+Adotar o sistema digital significa:
+
+  - Economizar dezenas de milhões de reais em 5 anos
+  - Viabilizar a frota de táxis elétricos sem perda de garantia
+  - Reduzir a zero o custo de alterações tarifárias
+  - Agilizar a implementação de novas tarifas
+  - Modernizar a fiscalização com auditoria digital
+  - Oferecer mais transparência ao passageiro
+
+O Brasil tem a oportunidade de sair na frente, aprendendo com os casos
+de sucesso internacionais e adaptando a regulação para a realidade
+digital. O momento é agora - com o crescimento da eletrificação veicular
+e a necessidade de modernização dos serviços públicos.
+
+================================================================================
+11. PERGUNTAS FREQUENTES (FAQ)
+================================================================================
+
+P: O aplicativo funciona sem internet?
+R: Sim. O cálculo da tarifa é feito localmente no dispositivo. A
+   internet é necessária apenas para receber atualizações de
+   configuração do servidor master e para a busca de endereços.
+
+P: Como evitar fraudes no GPS?
+R: O sistema utiliza validação cruzada de dados de GPS, rede celular
+   e acelerômetro. Qualquer anomalia é registrada para auditoria.
+
+P: E se o celular descarregar durante a corrida?
+R: O sistema mantém o estado da corrida em memória não volátil com
+   checkpoint a cada fração. Ao religar, a corrida pode ser retomada.
+
+P: Como o INMETRO fiscaliza?
+R: O órgão tem acesso master ao servidor, podendo auditar corridas,
+   verificar configurações e realizar testes de precisão remotamente.
+
+P: Qual a segurança contra o taxista alterar a tarifa?
+R: As configurações são protegidas por senha criptografada. O taxista
+   não tem acesso aos parâmetros tarifários - apenas a senha master
+   (órgão regulador) ou senha de oficina credenciada podem alterá-los.
+
+P: Preciso comprar um smartphone novo?
+R: Não necessariamente. O aplicativo roda em qualquer smartphone
+   Android ou iOS com GPS, a partir de modelos básicos de entrada.
+
+================================================================================
+  CONTATO
+
+  [Nome do responsável pelo projeto]
+  [Telefone]
+  [E-mail]
+  [Site / LinkedIn]
+
+================================================================================
+  Documento gerado em Junho de 2026
+  Versão 2.0
+================================================================================

@@ -53,6 +53,8 @@ let navRouteCoords = null; // array de [lat, lng] da rota
 let navSteps = null;       // steps do OSRM
 let navCurrentStep = -1;   // índice do step atual
 let isNavigating = false;
+let navTotalDist = 0;      // distância total da rota (m)
+let navTotalDur = 0;       // duração total da rota (s)
 
 // ---- CONSTANTES ----
 const STOP_THRESHOLD = 5; // km/h - abaixo disso considera "parado"
@@ -474,8 +476,8 @@ function startGPS() {
                 watchId = navigator.geolocation.watchPosition(
                     p => {
                         const { latitude, longitude, speed } = p.coords;
-                        updatePos(latitude, longitude);
                         trip.lastSpeed = speed || 0;
+                        updatePos(latitude, longitude);
                         if (trip.active) onTripMove(latitude, longitude, speed || 0);
                     },
                     () => {},
@@ -510,9 +512,9 @@ function startSimulator() {
         const step = 0.00008 + Math.random() * 0.00012;
         lat += Math.cos(heading * Math.PI / 180) * step;
         lng += Math.sin(heading * Math.PI / 180) * step;
-        updatePos(lat, lng);
         const simSpeed = Math.random() * 40 + 5;
         trip.lastSpeed = simSpeed;
+        updatePos(lat, lng);
         if (trip.active) {
             onTripMove(lat, lng, simSpeed);
         }
@@ -1152,6 +1154,8 @@ function startNavigation() {
             navSteps = route.legs[0].steps;
             navCurrentStep = -1;
             isNavigating = true;
+            navTotalDist = route.distance;
+            navTotalDur = route.duration;
 
             routeLine = L.polyline(coords, {
                 color: '#ff1744', weight: 5, opacity: 0.9, dashArray: '12, 8'
@@ -1175,6 +1179,9 @@ function startNavigation() {
             renderNavSteps(navSteps);
             if (navSteps.length) showNavStep(navSteps[0], 0);
             $('navPanel').classList.remove('hidden');
+            // Inicializa barra de progresso e info restante
+            $('navProgressFill').style.width = '0%';
+            $('navRemainingInfo').textContent = (navTotalDist / 1000).toFixed(1) + ' km restantes · ' + Math.round(navTotalDur) + ' min';
         })
         .catch(() => {});
 }
@@ -1264,6 +1271,8 @@ function clearRoute() {
     navRouteCoords = null;
     navSteps = null;
     navCurrentStep = -1;
+    navTotalDist = 0;
+    navTotalDur = 0;
     $('navPanel').classList.add('hidden');
 }
 
@@ -1290,7 +1299,7 @@ function closestRouteIndex(lat, lng) {
 }
 
 function updateNavProgress(lat, lng) {
-    if (!isNavigating || !navSteps || !navSteps.length) return;
+    if (!isNavigating || !navSteps || !navSteps.length || !navRouteCoords) return;
     const routeIdx = closestRouteIndex(lat, lng);
     if (routeIdx < 0) return;
 
@@ -1308,6 +1317,35 @@ function updateNavProgress(lat, lng) {
         navCurrentStep = stepIdx;
         showNavStep(navSteps[stepIdx], stepIdx);
     }
+
+    // Calcula distância percorrida ao longo da rota
+    let traveledDist = 0;
+    for (let i = 0; i < navRouteCoords.length - 1; i++) {
+        if (i >= routeIdx) break;
+        const dx = navRouteCoords[i + 1][0] - navRouteCoords[i][0];
+        const dy = navRouteCoords[i + 1][1] - navRouteCoords[i][1];
+        traveledDist += Math.sqrt(dx * dx + dy * dy) * 111320;
+    }
+    // Adiciona a distância parcial do segmento atual
+    const segLat = navRouteCoords[routeIdx][0], segLng = navRouteCoords[routeIdx][1];
+    const nextLat = navRouteCoords[Math.min(routeIdx + 1, navRouteCoords.length - 1)][0];
+    const nextLng = navRouteCoords[Math.min(routeIdx + 1, navRouteCoords.length - 1)][1];
+    const segDist = Math.sqrt((lat - segLat) ** 2 + (lng - segLng) ** 2) * 111320;
+    const totalSegDist = Math.sqrt((nextLat - segLat) ** 2 + (nextLng - segLng) ** 2) * 111320;
+    if (totalSegDist > 0) traveledDist += Math.min(segDist, totalSegDist);
+
+    const pct = navTotalDist > 0 ? Math.min(100, (traveledDist / navTotalDist) * 100) : 0;
+    const remainingDist = Math.max(0, navTotalDist - traveledDist);
+    const remainingDur = navTotalDur > 0 ? Math.round(navTotalDur * (remainingDist / navTotalDist)) : 0;
+
+    $('navProgressFill').style.width = pct + '%';
+    const rKm = (remainingDist / 1000).toFixed(1);
+    const rMin = remainingDur;
+    $('navRemainingInfo').textContent = rKm + ' km restantes · ' + rMin + ' min';
+
+    // Velocidade atual
+    const spd = Math.round(trip.lastSpeed || 0);
+    $('navNavSpeed').textContent = spd + ' km/h';
 }
 
 function openNavigation() {

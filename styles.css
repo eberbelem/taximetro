@@ -265,6 +265,14 @@ body {
     transform: scale(0.88);
 }
 
+#fareLogo {
+    display: block;
+    height: 20px;
+    width: auto;
+    margin: 0 auto 2px;
+    opacity: 0.9;
+}
+
 #fareLabel {
     font-size: 10px;
     font-weight: 700;
@@ -365,6 +373,9 @@ body {
 
 /* ========== RESPONSIVO TELAS PEQUENAS ========== */
 @media (max-width: 400px) {
+    #fareLogo {
+        height: 16px;
+    }
     #fareBox {
         gap: 4px;
         padding: 6px 6px;

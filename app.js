@@ -48,6 +48,12 @@ let smoothedSpeed = 0; // velocidade suavizada (EMA)
 let posBuffer = []; // buffer de posições para média móvel
 let tripHistory = []; // histórico de corridas
 
+// ---- NAVEGAÇÃO ----
+let navRouteCoords = null; // array de [lat, lng] da rota
+let navSteps = null;       // steps do OSRM
+let navCurrentStep = -1;   // índice do step atual
+let isNavigating = false;
+
 // ---- CONSTANTES ----
 const STOP_THRESHOLD = 5; // km/h - abaixo disso considera "parado"
 const UPDATE_INTERVAL = 1000; // 1s
@@ -441,7 +447,8 @@ function updatePos(lat, lng, heading) {
         }
         if (trip.active) setMarkerTaxi(lastHeading);
     }
-    if (map) map.panTo([lat, lng], { animate: true, duration: 0.5 });
+    updateNavProgress(lat, lng);
+    if (map && !trip.active) map.panTo([lat, lng], { animate: true, duration: 0.5 });
 }
 
 function startGPS() {
@@ -576,6 +583,9 @@ function onTripMove(lat, lng, speedKph) {
 
     trip.distance += distM / 1000;
     trip.lastPos = { lat, lng };
+
+    // Atualiza navegação (se ativa)
+    updateNavProgress(lat, lng);
 
     // Tarifa Horária: acumula tempo parado (speed < threshold)
     // Usa velocidade suavizada para evitar falsos positivos
@@ -1138,6 +1148,11 @@ function startNavigation() {
             const route = routeData.routes[0];
             const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
 
+            navRouteCoords = coords;
+            navSteps = route.legs[0].steps;
+            navCurrentStep = -1;
+            isNavigating = true;
+
             routeLine = L.polyline(coords, {
                 color: '#ff1744', weight: 5, opacity: 0.9, dashArray: '12, 8'
             }).addTo(map);
@@ -1157,9 +1172,8 @@ function startNavigation() {
             const routeFare = config.bandeirada + (parseFloat(distKm) * config.tarifa1);
             destInput.placeholder = fmtMoney(routeFare) + ' · ' + distKm + ' km · ' + durMin + ' min';
 
-            const steps = route.legs[0].steps;
-            renderNavSteps(steps);
-            if (steps.length) showNavStep(steps[0], 0);
+            renderNavSteps(navSteps);
+            if (navSteps.length) showNavStep(navSteps[0], 0);
             $('navPanel').classList.remove('hidden');
         })
         .catch(() => {});
@@ -1246,6 +1260,54 @@ function clearRoute() {
     if (!map) return;
     if (routeLine) { try { map.removeLayer(routeLine); } catch (e) {} routeLine = null; }
     if (routeLayer) { try { map.removeLayer(routeLayer); } catch (e) {} routeLayer = null; }
+    isNavigating = false;
+    navRouteCoords = null;
+    navSteps = null;
+    navCurrentStep = -1;
+    $('navPanel').classList.add('hidden');
+}
+
+function pointToSegmentDist(px, py, ax, ay, bx, by) {
+    const dx = bx - ax, dy = by - ay;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return Math.sqrt((px - ax) * (px - ax) + (py - ay) * (py - ay));
+    let t = ((px - ax) * dx + (py - ay) * dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    const cx = ax + t * dx, cy = ay + t * dy;
+    return Math.sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy));
+}
+
+function closestRouteIndex(lat, lng) {
+    if (!navRouteCoords || navRouteCoords.length < 2) return -1;
+    let minDist = Infinity, idx = 0;
+    for (let i = 0; i < navRouteCoords.length - 1; i++) {
+        const d = pointToSegmentDist(lat, lng,
+            navRouteCoords[i][0], navRouteCoords[i][1],
+            navRouteCoords[i + 1][0], navRouteCoords[i + 1][1]);
+        if (d < minDist) { minDist = d; idx = i; }
+    }
+    return idx;
+}
+
+function updateNavProgress(lat, lng) {
+    if (!isNavigating || !navSteps || !navSteps.length) return;
+    const routeIdx = closestRouteIndex(lat, lng);
+    if (routeIdx < 0) return;
+
+    let cumDist = 0;
+    let stepIdx = 0;
+    for (let i = 0; i < navSteps.length; i++) {
+        const stepDist = navSteps[i].distance;
+        if (cumDist + stepDist / 2 > routeIdx) { stepIdx = i; break; }
+        cumDist += stepDist;
+    }
+    if (routeIdx > navRouteCoords.length - 2) stepIdx = navSteps.length - 1;
+    if (stepIdx >= navSteps.length) stepIdx = navSteps.length - 1;
+
+    if (stepIdx !== navCurrentStep) {
+        navCurrentStep = stepIdx;
+        showNavStep(navSteps[stepIdx], stepIdx);
+    }
 }
 
 function openNavigation() {

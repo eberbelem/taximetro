@@ -92,6 +92,22 @@
 
             <!-- Imprimir recibo -->
             <button id="btnPrintRecibo" class="fab-print hidden" title="Imprimir Recibo">&#128424;</button>
+
+            <!-- Painel de navegação -->
+            <div id="navPanel" class="hidden">
+                <div id="navPanelHeader">
+                    <span id="navNextStreet">—</span>
+                    <button id="btnNavClose" class="icon-btn" style="width:30px;height:30px;font-size:18px;">&times;</button>
+                </div>
+                <div id="navPanelBody">
+                    <div id="navTurnArrow">&#10140;</div>
+                    <div id="navTurnInfo">
+                        <span id="navTurnDist">0 m</span>
+                        <span id="navTurnLabel">Siga em frente</span>
+                    </div>
+                </div>
+                <div id="navStepsList"></div>
+            </div>
         </div>
 
         </div>

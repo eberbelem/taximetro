@@ -1124,6 +1124,124 @@ function drawRouteOnMap() {
         });
 }
 
+function startNavigation() {
+    if (!currentPos || !map || !_navLat || !_navLng) return;
+    clearRoute();
+    $('navModal').classList.add('hidden');
+
+    fetch('https://router.project-osrm.org/route/v1/driving/' +
+        currentPos[1] + ',' + currentPos[0] + ';' + _navLng + ',' + _navLat +
+        '?overview=full&geometries=geojson&steps=true&alternatives=false')
+        .then(r => r.json())
+        .then(routeData => {
+            if (!routeData || !routeData.routes || !routeData.routes.length) return;
+            const route = routeData.routes[0];
+            const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+
+            routeLine = L.polyline(coords, {
+                color: '#ff1744', weight: 5, opacity: 0.9, dashArray: '12, 8'
+            }).addTo(map);
+
+            const startMarker = L.circleMarker([currentPos[0], currentPos[1]], {
+                radius: 8, color: '#00c853', fillColor: '#00c853', fillOpacity: 1
+            }).addTo(map);
+            const endMarker = L.circleMarker([_navLat, _navLng], {
+                radius: 8, color: '#ff5252', fillColor: '#ff5252', fillOpacity: 1
+            }).addTo(map);
+            routeLayer = L.layerGroup([startMarker, endMarker]);
+
+            map.fitBounds(routeLine.getBounds().pad(0.15));
+
+            const distKm = (route.distance / 1000).toFixed(1);
+            const durMin = Math.round(route.duration / 60);
+            const routeFare = config.bandeirada + (parseFloat(distKm) * config.tarifa1);
+            destInput.placeholder = fmtMoney(routeFare) + ' · ' + distKm + ' km · ' + durMin + ' min';
+
+            const steps = route.legs[0].steps;
+            renderNavSteps(steps);
+            if (steps.length) showNavStep(steps[0], 0);
+            $('navPanel').classList.remove('hidden');
+        })
+        .catch(() => {});
+}
+
+function renderNavSteps(steps) {
+    const list = $('navStepsList');
+    list.innerHTML = '';
+    steps.forEach((s, i) => {
+        const div = document.createElement('div');
+        div.className = 'nav-step-item';
+        div.dataset.index = i;
+        div.innerHTML = '<span class="ns-arrow">' + maneuverArrow(s.maneuver) + '</span>' +
+            '<span class="ns-street">' + (s.name || 'Via sem nome') + '</span>' +
+            '<span class="ns-dist">' + fmtNavDist(s.distance) + '</span>';
+        div.addEventListener('click', () => showNavStep(s, i));
+        list.appendChild(div);
+    });
+}
+
+function showNavStep(step, index) {
+    const items = $('navStepsList').querySelectorAll('.nav-step-item');
+    items.forEach((el, i) => el.style.background = i === index ? 'rgba(21,101,192,0.3)' : '');
+    $('navNextStreet').textContent = (index + 1) + '. ' + (step.name || 'Via sem nome');
+    $('navTurnArrow').textContent = maneuverArrow(step.maneuver);
+    $('navTurnDist').textContent = fmtNavDist(step.distance);
+    $('navTurnLabel').textContent = maneuverText(step.maneuver);
+}
+
+function maneuverArrow(m) {
+    if (!m) return '&#10140;';
+    const type = m.type;
+    const mod = m.modifier || '';
+    if (type === 'turn' || type === 'continue') {
+        if (mod === 'left') return '&#8592;';
+        if (mod === 'right') return '&#8594;';
+        if (mod === 'sharp left') return '&#9001;';
+        if (mod === 'sharp right') return '&#9002;';
+        if (mod === 'slight left') return '&#8604;';
+        if (mod === 'slight right') return '&#8605;';
+    }
+    if (type === 'fork' || type === 'ramp' || type === 'exit') {
+        if (mod === 'left') return '&#8600;';
+        if (mod === 'right') return '&#8599;';
+    }
+    if (type === 'roundabout' || type === 'rotary') return '&#8635;';
+    if (type === 'arrive') return '&#128205;';
+    if (type === 'depart') return '&#128204;';
+    if (type === 'merge') return '&#8604;';
+    return '&#10140;';
+}
+
+function maneuverText(m) {
+    if (!m) return 'Siga';
+    const type = m.type;
+    const mod = m.modifier || '';
+    if (type === 'depart') return 'Siga em frente';
+    if (type === 'turn' || type === 'continue') {
+        if (mod === 'left') return 'Vire à esquerda';
+        if (mod === 'right') return 'Vire à direita';
+        if (mod === 'sharp left') return 'Vire bruscamente à esquerda';
+        if (mod === 'sharp right') return 'Vire bruscamente à direita';
+        if (mod === 'slight left') return 'Mantenha-se à esquerda';
+        if (mod === 'slight right') return 'Mantenha-se à direita';
+        if (mod === 'straight') return 'Siga em frente';
+    }
+    if (type === 'fork' || type === 'ramp' || type === 'exit') {
+        if (mod === 'left') return 'Pegue a saída à esquerda';
+        if (mod === 'right') return 'Pegue a saída à direita';
+    }
+    if (type === 'roundabout') return 'Rotatória';
+    if (type === 'rotary') return 'Rotatória';
+    if (type === 'merge') return 'Entre na via';
+    if (type === 'arrive') return 'Chegou ao destino';
+    return 'Siga em frente';
+}
+
+function fmtNavDist(meters) {
+    if (meters >= 1000) return (meters / 1000).toFixed(1) + ' km';
+    return Math.round(meters) + ' m';
+}
+
 function clearRoute() {
     if (!map) return;
     if (routeLine) { try { map.removeLayer(routeLine); } catch (e) {} routeLine = null; }
@@ -1397,15 +1515,9 @@ function registrarEventos() {
     const btnStartNav = document.getElementById('btnStartNav');
     if (navModal) navModal.addEventListener('click', e => { if (e.target === navModal) navModal.classList.add('hidden'); });
     if (btnDrawRoute) btnDrawRoute.addEventListener('click', drawRouteOnMap);
-    if (btnStartNav) btnStartNav.addEventListener('click', () => {
-        if (!_navLat || !_navLng || !currentPos) return;
-        const url = 'https://www.google.com/maps/dir/?api=1&origin=' +
-            currentPos[0] + ',' + currentPos[1] +
-            '&destination=' + _navLat + ',' + _navLng +
-            '&travelmode=driving';
-        window.open(url, '_blank');
-        navModal.classList.add('hidden');
-    });
+    if (btnStartNav) btnStartNav.addEventListener('click', startNavigation);
+    const btnNavClose = document.getElementById('btnNavClose');
+    if (btnNavClose) btnNavClose.addEventListener('click', () => { $('navPanel').classList.add('hidden'); });
 
     btnLogin.addEventListener('click', handleLogin);
     pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
